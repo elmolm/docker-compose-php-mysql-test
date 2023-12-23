@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mysql:8.0.35
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: devuser
+      MYSQL_PASSWORD: devpass
+    ports:
+      - "13308:3306"
+    security_opt:
+      - seccomp:unconfined
+    restart: always
+    volumes:
+      - db_data_php:/var/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/datadump.sql
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: php82
+    depends_on:
+      - db
+    volumes:
+      - ./php/:/var/www/html/
+    ports:
+      - "8100:80"
+    stdin_open: true
+    tty: true
+volumes:
+  db_data_php:
